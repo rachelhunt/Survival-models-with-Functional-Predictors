@@ -28,14 +28,15 @@ library(stringr)
 time_to_injury$ID <- str_to_title(time_to_injury$ID)
 
 # Data on exclusion information:
-excl_info <- read_excel("~/Desktop/Research/RISC Data/Injury_Exclusions_SD.xlsx")
-head(excl_info)
+#excl_info <- read_excel("~/Desktop/Research/RISC Data/Injury_Exclusions_SD.xlsx")
+#head(excl_info)
 
-excl_info <- na.omit(excl_info)
-dim(excl_info)
+#excl_info <- na.omit(excl_info)
+#dim(excl_info)
 
-excl_info$ID <- str_to_title(excl_info$ID)
-names(excl_info)[1] ="subject_id"
+#excl_info$ID <- str_to_title(excl_info$ID)
+#names(excl_info)[1] ="subject_id"
+#rm(excl_info)
 
 ##################### EDA: comparing the two larger datasets
 library(janitor)
@@ -110,17 +111,17 @@ length(unique(demographic_w_survival$subject_id))
 #306 ! 7 different
 
 # survival with exclusion data
-survival_w_excl <- merge( time_to_injury,  excl_info,
+#survival_w_excl <- merge( time_to_injury,  excl_info,
                           by = c("subject_id"), all = TRUE) 
-head(survival_w_excl)
+#head(survival_w_excl)
 #View(survival_w_excl)
-survival_w_excl[2]
+#survival_w_excl[2]
 
-survival_w_excl %>% filter(is.na(DaystoRRI1))
+#survival_w_excl %>% filter(is.na(DaystoRRI1))
 
-setdiff(excl_info$subject_id,time_to_injury$subject_id) 
+#setdiff(excl_info$subject_id,time_to_injury$subject_id) 
 
-setdiff(excl_info$subject_id,discrete$subject_id)
+#setdiff(excl_info$subject_id,discrete$subject_id)
 
 ## ------------------------------------- Survival Edits based on Exclusion Info ---------------
 
@@ -169,7 +170,7 @@ demographic_w_survival$DaystoRRI1[296] <- 14
 demographic_w_survival$EventInjuryYr1[296] <- 0
 
 # Keep these ^ ??
-
+# Exclude at first - then add in if make a difference **
 
 
 # Poor responders, No Participant, etc.
@@ -451,4 +452,12 @@ ggsurvplot(fit9, data = demographic_w_survival, pval = TRUE,)
    #        facet.by = 'retrospective_injury_status')
            
 # Fix legend here!
+
+### ----------------------------- Getting Coverage - Erjia Code  -------------------------------
+
+#dim()
+#names()
+# need to add in functional aspect, combine survival with demo and funct. 
+# using similar matching tools
+
 

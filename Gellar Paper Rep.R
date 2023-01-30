@@ -87,11 +87,28 @@ vis.gam(fit_afcm, view = c("tmat", "X"), plot.type = "contour", color = "cm",
 #fit_lfcm_pfr <- pfr(Time ∼ Age + BMI + Education + lf(MIMS, bs="cc", k=30), 
 #                    weights=Event, data=data analysis, family=cox.ph())
 
-fit_lfcm_pfr <- pfr(survtime ~ Z + lf(data_analysis$tmat, bs="cc", k=30), 
-                    weights=event, data=data_analysis, family=cox.ph())
+event <- sofa_fu$event ## 30% of subjects have events observed 
+# los?
+survtime <- sofa_fu$time ## observed time
+# death?
+Z <- sofa_fu$Charlson ## a scalar predictor (can add in age and male)
+
+
+
+fit_lfcm_pfr <- pfr(time ~ Charlson + lf(sofa_ds, bs="cc", k=30), 
+                    weights=event, data=sofa_fu, family=cox.ph())
+
+pfr(time ~ lf(sofa_ds, bs="cc", k=30),
+    weights=event, data=sofa_fu, family=cox.ph())
 #summary(data_analysis)
 #error: argument 'length.out' must be of length 1
+# error: object 'L.data_analysis' not found
 # ?pfr from refund package
 ?pfr
+?lf
+?s
+
+gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
+    data=data_analysis, family=cox.ph())
 
 
