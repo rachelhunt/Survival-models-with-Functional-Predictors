@@ -106,9 +106,9 @@ pfr(time ~ lf(sofa_ds, bs="cc", k=30),
 # ?pfr from refund package
 ?pfr
 ?lf
+?te
 ?s
 
-gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
-    data=data_analysis, family=cox.ph())
-
+#gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
+#    data=data_analysis, family=cox.ph())
 
