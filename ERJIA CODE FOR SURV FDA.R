@@ -172,5 +172,5 @@ str(data_analysis)
 # Event: mortstat
 # Time to event: n_good_days
 # functional: data_analysis$AC
-
-data_analysis$act_log_mat_sm   <- I(fpca.face(unclass(data_analysis$AC))$Yhat)
+s
+#data_analysis$act_log_mat_sm   <- I(fpca.face(unclass(data_analysis$AC))$Yhat)
