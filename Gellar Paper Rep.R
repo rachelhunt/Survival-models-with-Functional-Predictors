@@ -40,7 +40,8 @@ names(sofa_fu)
 ## Scalar predictors: age, male, Charlson 
 # (tried initially with untransformed SOFA, received error of:
 # Not enough (non-NA) data to do anything meaningful)
-
+# ds = domain standardised
+# 
 
 # --------------------------Using Erjia's code template to replicate ---------------------
 
@@ -115,6 +116,11 @@ sofa_fu$SOFA_ds_sm   <- I(fpca.face(unclass(sofa_fu$SOFA_ds))$Yhat)
 
 ## obtain quantile-transformed smoothed
 sofa_fu$SOFA_ds_sm_q <- I(apply(sofa_fu$SOFA_ds_sm, 2, function(y) ecdf(y)(y)))
+
+## From gellar paper: specific domain transformation s := gi(u) = u/Ui
+# New sofa functions that are each defined over [0, 1], Xi(s) = Xi(sUi)
+# carry out LOCF too ? 
+dim(sofa_fu$SOFA_ds)
 
 ### lmat: numerical integration
 sofa_fu$lmat <- I(matrix(1/157, ncol=157, nrow=nrow(sofa_fu)))

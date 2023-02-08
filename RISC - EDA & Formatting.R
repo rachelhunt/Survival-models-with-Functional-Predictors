@@ -112,7 +112,7 @@ length(unique(demographic_w_survival$subject_id))
 
 # survival with exclusion data
 #survival_w_excl <- merge( time_to_injury,  excl_info,
-                          by = c("subject_id"), all = TRUE) 
+#                          by = c("subject_id"), all = TRUE) 
 #head(survival_w_excl)
 #View(survival_w_excl)
 #survival_w_excl[2]
@@ -153,7 +153,7 @@ demographic_w_survival$DaystoRRI1[305] <- 90
 demographic_w_survival$EventInjuryYr1[305] <- 0
 
 # Time given as "shortly after enrollment: Setting to 2 weeks
-# P_4213, P_4242, P_4255, P_4291, P_4304. (5 total)
+# P_4213, P_4242, P_4255, P_4291, P_4304. (5 total) Remove then add in ??
 demographic_w_survival$DaystoRRI1[208] <- 14
 demographic_w_survival$EventInjuryYr1[208] <- 0
 
@@ -229,12 +229,12 @@ summary(control_group)
 
 # age
 ggplot(data = demographic_w_survival, mapping= aes(x= age, fill = EventInjuryYr1)) + 
-  geom_bar( )
+  geom_bar( ) 
 
 ggplot(data = event_group, mapping= aes(x= age)) + 
   geom_bar( )
 ggplot(data = control_group, mapping= aes(x= age)) + 
-  geom_bar( )
+  geom_bar( ) 
 
 # sex
 ggplot(data = demographic_w_survival, mapping= aes(x= sex, fill = EventInjuryYr1)) + 
@@ -453,13 +453,150 @@ ggsurvplot(fit9, data = demographic_w_survival, pval = TRUE,)
            
 # Fix legend here!
 
+### ----------------------------- Getting left_ankle_abduction data! -------------------------------
+
+## combine survival with demo and funct. 
+
+# remember to make sure to remove these individuals:
+# P_4213, P_4242, P_4255, P_4291, P_4304. 
+
+######## Left, Ankle, Abduction 
+
+## Subsetting functional curves:
+# Use basis_coef
+dim(basis_coef)
+
+left_ankle_abduction <- basis_coef %>% 
+  filter(side == "left" & location =="Ankle" & plane_of_motion == "abd") %>% 
+  dplyr::select(1,2,4,51:132)
+
+# OR Use discrete
+left_ankle_abduction <- discrete %>% 
+  filter(side == "left" & location =="Ankle" & plane_of_motion == "abd") %>% 
+  dplyr::select(1,2,4,52:153)
+
+dim(left_ankle_abduction)
+
+## Combining these curves with survival and demographic data
+
+left_ank_abd_surv <- merge(demographic_w_survival, left_ankle_abduction, 
+                                by = c("subject_id"), all = TRUE)       
+head(left_ank_abd_surv) 
+dim(left_ank_abd_surv)
+length(unique(left_ank_abd_surv$subject_id)) 
+length(unique(left_ank_abd_surv$stride_num)) 
+summary(left_ank_abd_surv$stride_num)
+
+
+######## Right, Hip, Flexion
+# use basis_coef
+dim(basis_coef)
+
+right_hip_flexion <- basis_coef %>% 
+  filter(side == "right" & location =="Hip" & plane_of_motion == "fle") %>% 
+  dplyr::select(1,2,4,51:132)
+
+# OR Use discrete
+right_hip_flexion <- discrete %>% 
+  filter(side == "right" & location =="Hip" & plane_of_motion == "fle") %>% 
+  dplyr::select(1,2,4,52:153)
+
+dim(right_hip_flexion)
+summary(right_hip_flexion)
+
+## Combining these curves with survival and demographic data
+right_hip_flexion_surv <- merge(demographic_w_survival, right_hip_flexion, 
+                           by = c("subject_id"), all = TRUE)       
+head(right_hip_flexion_surv) 
+dim(right_hip_flexion_surv)
+length(unique(right_hip_flexion_surv$subject_id)) 
+length(unique(right_hip_flexion_surv$stride_num)) 
+summary(right_hip_flexion_surv$stride_num)
+
+
+######## Left, Knee, Rotation 
+
+# use basis_coef
+dim(basis_coef)
+
+left_knee_rotation <- basis_coef %>% 
+  filter(side == "left" & location =="Knee" & plane_of_motion == "rot") %>% 
+  dplyr::select(1,2,4,51:132)
+
+# OR Use discrete
+left_knee_rotation <- discrete %>% 
+  filter(side == "left" & location =="Knee" & plane_of_motion == "rot") %>% 
+  dplyr::select(1,2,4,52:153)
+
+dim(right_hip_flexion)
+summary(right_hip_flexion)
+
+## Combining these curves with survival and demographic data
+left_knee_rotation_surv <- merge(demographic_w_survival, left_knee_rotation, 
+                                by = c("subject_id"), all = TRUE)       
+head(left_knee_rotation_surv) 
+dim(left_knee_rotation_surv)
+
+### ----------------------------- Functional Plotting  -------------------------------
+
+# columns = 15:115 for discrete, 14:93 for basis_coef
+# n = 101 for discrete, 80 for basis coef
+stride <- 1:80
+# instead of 137
+n <- length(unique(left_ank_abd_surv$subject_id))
+
+matplot(stride, t(left_ank_abd_surv[,14:93]), 
+        type='l', lty=1, col=rainbow(n),
+        main = "Left Ankle Angles - Abduction Plane",
+        xlab="basis_coef", ylab="angle")
+
+
+stride <- 1:80
+matplot(stride, t(right_hip_flexion_surv[,14:93]), 
+        type='l', lty=1, col=rainbow(n),
+        main = "Right Hip Angles - Flexion Plane",
+        xlab="basis_coef", ylab="angle")
+
+stride <- 1:101
+n <- length(unique(left_knee_rotation_surv$subject_id))
+
+matplot(stride, t(left_knee_rotation_surv[,15:115]), 
+        type='l', lty=1, col=rainbow(n),
+        main = "Left Knee Angles - Rotation Plane",
+        xlab="time", ylab="angle")
+
 ### ----------------------------- Getting Coverage - Erjia Code  -------------------------------
 
-#dim()
-#names()
-# need to add in functional aspect, combine survival with demo and funct. 
-# using similar matching tools
+library(mgcv)
+library(refund)
 
+n <- 306 ## number of subjects
+s <- 137 ## number of functional observations per subject
+event <- left_ank_abd_surv$EventInjuryYr1 ## 30% of subjects have events observed 
+survtime <- left_ank_abd_surv$DaystoRRI1 ## observed time
 
+## transformations on X may be necessary for identifiability in practice 
+X <- as.matrix(left_ank_abd_surv[,14:93])
+#X <- fpca.face(X)$Yhat ## smooth each curve using fast sandwich smoother (try without for now)
+Z <- left_ank_abd_surv$sex## a scalar predictor (can add in age and male)
+data_analysis <- data.frame(event, survtime, Z, X = I(X)) ## the dataset 
+#rm(event, survtime, X, Z) # removing them from the environment,  ?rm
+str(data_analysis)
 
+## create variables related to numerical approximation
+### lmat: numerical integration
+data_analysis$lmat <- I(matrix(1/s, ncol=s, nrow=nrow(data_analysis)))
+### tmat: time indices of functional observations, we assume an equally-spaced grid here 
+data_analysis$tmat <- I(matrix(seq(0, 1, len=s), ncol=s, nrow=nrow(data_analysis), byrow=TRUE))
 
+## fit LFCM
+fit_lfcm <- gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
+                data=data_analysis, family=cox.ph())
+# ERROR: invalid type (list) for variable 'X'
+# set X as matrix, new error: indefinite penalized likelihood in gam.fit5
+
+## fit AFCM
+fit_afcm <- gam(survtime ~ Z + ti(tmat, X, by=lmat, bs=c("cr","cr"), k=c(10,10),
+                                  mc=c(FALSE,TRUE)), weights=event, data=data_analysis,
+                family=cox.ph())
+# Same error
