@@ -417,5 +417,19 @@ for (i in 1:20) {
   gamma <- gamma - solve(H+sp*S,g) 
 }
 
+# -------------------------- Chapter 7 ----------------------------------------
+library(mgcv); library(MASS) ## load for mcycle data. 
+## set up a smoother...
+sm <- smoothCon(s(times,k=10),data=mcycle,knots=NULL)[[1]] 
+## use it to fit a regression spline model... 
+beta <- coef(lm(mcycle$accel~sm$X-1)) 
+with(mcycle,plot(times,accel)) ## plot data 
+times <- seq(0,60,length=200) ## create prediction times 
+## Get matrix mapping beta to spline prediction at ’times’ 
+Xp <- PredictMat(sm,data.frame(times=times)) 
+lines(times,Xp%*%beta) ## add smooth to plot
 
+## Brain Imaging Example - - No Dataset
+
+### 
 
