@@ -229,31 +229,20 @@ summary(control_group)
 
 # age
 ggplot(data = demographic_w_survival, mapping= aes(x= age, fill = EventInjuryYr1)) + 
-  geom_bar( ) 
-
-ggplot(data = event_group, mapping= aes(x= age)) + 
-  geom_bar( )
-ggplot(data = control_group, mapping= aes(x= age)) + 
-  geom_bar( ) 
+  geom_histogram( ) + facet_wrap(~EventInjuryYr1) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured')) 
 
 # sex
 ggplot(data = demographic_w_survival, mapping= aes(x= sex, fill = EventInjuryYr1)) + 
-  geom_bar( )
-
-ggplot(data = event_group, mapping= aes(x= sex)) + 
-  geom_bar( )
-ggplot(data = control_group, mapping= aes(x= sex)) + 
-  geom_bar( )
+  geom_bar( )  + facet_wrap(~EventInjuryYr1) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured')) 
 
 # runner_category
 ggplot(data = demographic_w_survival, mapping = aes(x= runner_category, 
                                                     fill = EventInjuryYr1)) + 
-  geom_bar( )
-
-ggplot(data = event_group, mapping = aes(x= runner_category)) + 
-  geom_bar( )
-ggplot(data = control_group, mapping = aes(x= runner_category)) + 
-  geom_bar( )
+  geom_bar( ) + facet_wrap(~EventInjuryYr1) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured')) +
+  theme(axis.text.x = element_text(angle = 45))
 
 # weight_kg
 #ggplot(data = demographic_w_survival, mapping = aes(x= weight_kg, 
@@ -264,46 +253,28 @@ ggplot(data = control_group, mapping = aes(x= runner_category)) +
 # bmi_kgm
 ggplot(data = demographic_w_survival, mapping = aes(x= bmi_kgm, 
                                                     fill = EventInjuryYr1)) + 
-  geom_histogram( )
-
-ggplot(data = event_group, mapping = aes(x= bmi_kgm)) + 
-  geom_histogram( )
-ggplot(data = control_group, mapping = aes(x= bmi_kgm)) + 
-  geom_histogram( )
+  geom_histogram( ) + facet_wrap(~EventInjuryYr1) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured'))
 
 # retrospective_injury_status - -  Questions??
 ggplot(data = demographic_w_survival, mapping = aes(x= retrospective_injury_status, 
                                                     fill = EventInjuryYr1)) + 
   geom_bar( ) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-ggplot(data = event_group, mapping = aes(x= retrospective_injury_status)) + 
-  geom_bar( ) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-ggplot(data = control_group, mapping = aes(x= retrospective_injury_status)) + 
-  geom_bar( ) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured'))
 
 # prospectively_injured_12_mths
 ggplot(data = demographic_w_survival, mapping = aes(x= prospectively_injured_12_mths, 
                                                     fill = EventInjuryYr1)) + 
-  geom_bar( )
-
-ggplot(data = event_group, mapping = aes(x= prospectively_injured_12_mths)) + 
-  geom_bar( )
-ggplot(data = control_group, mapping = aes(x= prospectively_injured_12_mths)) + 
-  geom_bar( )
-#correct!
+  geom_bar( ) + facet_wrap(~EventInjuryYr1) + 
+  scale_fill_discrete(labels=c('Injured', 'Not Injured')) +
+  theme(axis.text.x = element_text(angle = 45)) 
+# Correct!
 
 # num_retrospective_injuries_1_yr
 ggplot(data = demographic_w_survival, mapping = aes(x= num_retrospective_injuries_1_yr, 
                                                     fill = EventInjuryYr1)) + 
-  geom_bar( )
-
-ggplot(data = event_group, mapping = aes(x= num_retrospective_injuries_1_yr)) + 
-  geom_bar( )
-ggplot(data = control_group, mapping = aes(x= num_retrospective_injuries_1_yr)) + 
-  geom_bar( )
+  geom_bar( ) +  scale_fill_discrete(labels=c('Injured', 'Not Injured'))
 
 
 ## ----------------------------- Survival - Simple Cox Model  -------------------------------
@@ -413,9 +384,10 @@ fit6 <- survfit(surv_object ~ prospectively_injured_12_mths, data = demographic_
 summary(fit6)
 # Plotting Kaplan-Meier Survival Curves
 ggsurvplot(fit6, data = demographic_w_survival, pval = TRUE,
+           pval.method = TRUE,
            legend.labs = c("not_injured","injured"),
            title = "prospectively_injured_12_mths" )
-#  p < 0.0001 - significant!
+#  p < 0.0001 - significant! Obviously
 
 # "num_retrospective_injuries_1_yr" 
 demographic_w_survival$num_retrospective_injuries_1_yr <- 
@@ -424,6 +396,7 @@ fit7 <- survfit(surv_object ~ num_retrospective_injuries_1_yr, data = demographi
 summary(fit7)
 # Plotting Kaplan-Meier Survival Curves
 ggsurvplot(fit7, data = demographic_w_survival, pval = TRUE, 
+           pval.method = TRUE,
            legend.labs = c("0","1","2","3","4"),
            title = "num_retrospective_injuries_1_yr" )
 #  p < 0.033 - significant!
@@ -435,6 +408,7 @@ fit8 <- survfit(surv_object ~ simplified_retrospective_injury_status, data = dem
 summary(fit8)
 # Plotting Kaplan-Meier Survival Curves
 ggsurvplot(fit8, data = demographic_w_survival, pval = TRUE,
+           pval.method = TRUE,
            legend.labs = c("no","yes"),
             title = "simplified_retrospective_injury_status")
 #  p < 0.036 - significant!

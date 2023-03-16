@@ -1,4 +1,5 @@
 ## Football Player Data from Andrew NUIG
+library(ggplot2)
 
 football <- read.csv("/Users/rachelhunt/Documents/GitHub/Survival-models-with-Functional-Predictors/injury_football.csv")
 
@@ -19,7 +20,8 @@ summary(football)
 # CRP - C-Reactive Protein? (Google) Check for infection
 # OSI - oxidative stress index                
 ### flightTime 
-### peakPower           
+### peakPower - M/Power is the average power output in W/kg during the duration of that
+### > high intensity activity. ??
 ### jumpHeight
 ### dass                   
 # TD - Total Distance (m) (external training load marker)
