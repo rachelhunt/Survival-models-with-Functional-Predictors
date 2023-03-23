@@ -429,6 +429,7 @@ ggsurvplot(fit9, data = demographic_w_survival, pval = TRUE,)
 
 ### ----------------------------- Getting left_ankle_abduction data! -------------------------------
 
+library(fda)
 ## combine survival with demo and funct. 
 
 # remember to make sure to remove these individuals:
@@ -544,18 +545,19 @@ matplot(stride, t(left_knee_rotation_surv[,15:115]),
 library(mgcv)
 library(refund)
 
-n <- 306 ## number of subjects
-s <- 137 ## number of functional observations per subject
+n <- 306 ## number of subjects  - - length(unique(left_ank_abd_surv$subject_id))
+s <- 80 ## max number of functional observations per subject - - 137 for discrete
 event <- left_ank_abd_surv$EventInjuryYr1 ## 30% of subjects have events observed 
 survtime <- left_ank_abd_surv$DaystoRRI1 ## observed time
 
 ## transformations on X may be necessary for identifiability in practice 
-X <- as.matrix(left_ank_abd_surv[,14:93])
+X <- as.matrix(left_ank_abd_surv[,16:95])
 #X <- fpca.face(X)$Yhat ## smooth each curve using fast sandwich smoother (try without for now)
 Z <- left_ank_abd_surv$sex## a scalar predictor (can add in age and male)
 data_analysis <- data.frame(event, survtime, Z, X = I(X)) ## the dataset 
 #rm(event, survtime, X, Z) # removing them from the environment,  ?rm
 str(data_analysis)
+# 24714 rows, 80 cols in X
 
 ## create variables related to numerical approximation
 ### lmat: numerical integration
@@ -569,8 +571,16 @@ fit_lfcm <- gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
 # ERROR: invalid type (list) for variable 'X'
 # set X as matrix, new error: indefinite penalized likelihood in gam.fit5
 
+fit_lfcm <- gam(time_mort ~ Alcohol + Overall_health + PIR + Employed +
+                  Age + BMI_cat + SmokeCigs + Race + Education +
+                  ## fit AFCM
+                  CHD + Diabetes + CHF + Stroke + MobilityProblem + Cancer +
+                  s(tmat, by=lmat*act_log_mat_sm_q, bs="cc", k=10),
+                weights=event, data=data_analysis, family=cox.ph())
+
 ## fit AFCM
 fit_afcm <- gam(survtime ~ Z + ti(tmat, X, by=lmat, bs=c("cr","cr"), k=c(10,10),
                                   mc=c(FALSE,TRUE)), weights=event, data=data_analysis,
                 family=cox.ph())
 # Same error
+
