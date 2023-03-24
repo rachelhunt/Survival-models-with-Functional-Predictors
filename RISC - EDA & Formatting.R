@@ -571,12 +571,14 @@ fit_lfcm <- gam(survtime ~ Z + s(tmat, by=lmat*X, bs="cr", k=10), weights=event,
 # ERROR: invalid type (list) for variable 'X'
 # set X as matrix, new error: indefinite penalized likelihood in gam.fit5
 
+
+
 fit_lfcm <- gam(time_mort ~ Alcohol + Overall_health + PIR + Employed +
                   Age + BMI_cat + SmokeCigs + Race + Education +
                   ## fit AFCM
                   CHD + Diabetes + CHF + Stroke + MobilityProblem + Cancer +
                   s(tmat, by=lmat*act_log_mat_sm_q, bs="cc", k=10),
-                weights=event, data=data_analysis, family=cox.ph())
+                weights=event, data=nhanes, family=cox.ph())
 
 ## fit AFCM
 fit_afcm <- gam(survtime ~ Z + ti(tmat, X, by=lmat, bs=c("cr","cr"), k=c(10,10),
@@ -584,3 +586,59 @@ fit_afcm <- gam(survtime ~ Z + ti(tmat, X, by=lmat, bs=c("cr","cr"), k=c(10,10),
                 family=cox.ph())
 # Same error
 
+## ----------------------------- AFCM - NHANES  -------------------------------
+
+# Save data from Rmd Run (30 mins)
+#saveRDS(data_analysis, "NHANES.rds")
+# set working directory, then load the nhanes data
+nhanes <- readRDS("NHANES.rds")
+str(nhanes)
+
+nhanes$event[which(nhanes$time_mort > 10)] <- 0
+nhanes$time_mort[which(nhanes$time_mort > 10)] <- 10
+table(nhanes$event)
+
+## obtain smoothed LAC
+nhanes$act_log_mat_sm   <- I(fpca.face(
+  unclass(nhanes$act_log_mat))$Yhat)
+
+## obtain quantile-transformed smoothed LAC
+nhanes$act_log_mat_sm_q <- I(apply(nhanes$act_log_mat_sm, 2, 
+                                   function(y) ecdf(y)(y)))
+
+### lmat: numerical integration
+nhanes$lmat <- I(matrix(1/1440, ncol=1440, nrow=nrow(nhanes)))
+### tmat: time indices, [0, 1] in our case, but effectively arbitrary
+nhanes$tmat <- I(matrix(1:1440, ncol=1440, nrow=nrow(nhanes), byrow=TRUE))
+
+## fit LFCM
+fit_lfcm <- gam(time_mort ~ Alcohol + Overall_health + PIR + Employed +
+                  Age + BMI_cat + SmokeCigs + Race + Education +
+                  CHD + Diabetes + CHF + Stroke + MobilityProblem + Cancer +
+                  s(tmat, by=lmat*act_log_mat_sm_q, bs="cc", k=10),
+                weights=event, data=nhanes, family=cox.ph())
+
+fit_lfcm
+summary(fit_lfcm)
+
+## fit AFCM
+fit_afcm <- gam(time_mort ~ Alcohol + Overall_health + PIR + Employed +
+                  Age + BMI_cat + SmokeCigs + Race + Education +
+                  CHD + Diabetes + CHF + Stroke + MobilityProblem + Cancer +
+                  ti(tmat, act_log_mat_sm_q, by=lmat, bs=c("cc","cr"),
+                     k=c(5,5), mc=c(FALSE,TRUE)),
+                weights=event, data=nhanes, family=cox.ph())
+
+fit_afcm
+summary(fit_afcm)
+
+## visualize the estimates
+par(mfrow = c(1,2))
+vis.gam(fit_lfcm, view = c("tmat", "act_log_mat_sm_q"), 
+        plot.type = "contour", 
+        color = "cm",
+        main = "Estimates from LFCM")
+vis.gam(fit_afcm, view = c("tmat", "act_log_mat_sm_q"), 
+        plot.type = "contour", 
+        color = "cm",
+        main = "Estimates from AFCM")
